@@ -39,26 +39,30 @@ struct LiveActivityViewContentState: View {
         case .minimal:
             // Minimal presentation with no chart.
             ZStack {
-                HStack(alignment: .center) {
-                    Text("\(state.bgValueStringInUserChosenUnit()) \(state.trendArrow())")
-                        .font(.largeTitle).bold()
-                        .foregroundStyle(state.bgTextColor())
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.2)
-
-                    Spacer()
-
-                    HStack(alignment: .center, spacing: 12) {
-                        deltaAndUnitText(font: .title)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .center) {
+                        Text("\(state.bgValueStringInUserChosenUnit()) \(state.trendArrow())")
+                            .font(.largeTitle).bold()
+                            .foregroundStyle(state.bgTextColor())
                             .lineLimit(1)
                             .minimumScaleFactor(0.2)
 
-                        if let deviceStatusIconImage = state.deviceStatusIconImage(), let deviceStatusColor = state.deviceStatusColor() {
-                            deviceStatusIconImage
-                                .font(.title2).bold()
-                                .foregroundStyle(deviceStatusColor)
+                        Spacer()
+
+                        HStack(alignment: .center, spacing: 12) {
+                            deltaAndUnitText(font: .title)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.2)
+
+                            if let deviceStatusIconImage = state.deviceStatusIconImage(), let deviceStatusColor = state.deviceStatusColor() {
+                                deviceStatusIconImage
+                                    .font(.title2).bold()
+                                    .foregroundStyle(deviceStatusColor)
+                            }
                         }
                     }
+
+                    readingAgeText
                 }
 
                 if state.warnUserToOpenApp {
@@ -67,6 +71,7 @@ struct LiveActivityViewContentState: View {
             }
             .activityBackgroundTint(.black)
             .padding([.leading, .trailing], 20)
+            .padding(.vertical, 8)
 
         case .normal:
             // Normal presentation with compact chart.
@@ -187,22 +192,7 @@ struct LiveActivityViewContentState: View {
 
                         Spacer(minLength: 8)
 
-                        // System-managed relative text keeps aging even without a new reading.
-                        Group {
-                            if let readingDate = state.bgReadingDate {
-                                HStack(spacing: 3) {
-                                    Text("Updated")
-                                    Text(readingDate, style: .relative)
-                                    Text("ago")
-                                }
-                            } else {
-                                Text("No reading yet")
-                            }
-                        }
-                            .font(.caption)
-                            .foregroundStyle(Color("colorSecondary"))
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
+                        readingAgeText
                     }
                     .padding(.top, 4)
                     .padding(.bottom, 8)
@@ -221,6 +211,26 @@ struct LiveActivityViewContentState: View {
         case .disabled:
             EmptyView()
         }
+    }
+
+    // Keep the relative date as standalone Text so WidgetKit can update it without
+    // a new reading or app refresh. Share the existing Large presentation with Minimal.
+    private var readingAgeText: some View {
+        Group {
+            if let readingDate = state.bgReadingDate {
+                HStack(spacing: 3) {
+                    Text("Updated")
+                    Text(readingDate, style: .relative)
+                    Text("ago")
+                }
+            } else {
+                Text("No reading yet")
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(Color("colorSecondary"))
+        .lineLimit(1)
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     private func deltaText(font: Font) -> Text {
