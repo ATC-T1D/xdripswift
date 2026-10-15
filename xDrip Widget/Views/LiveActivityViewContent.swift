@@ -187,7 +187,14 @@ struct LiveActivityViewContentState: View {
 
                         Spacer(minLength: 8)
 
-                        Text("Last reading at \(state.bgReadingDate?.formatted(date: .omitted, time: .shortened) ?? "--:--")")
+                        // System-managed relative text keeps aging even without a new reading.
+                        Group {
+                            if let readingDate = state.bgReadingDate {
+                                Text("Updated \(Text(readingDate, style: .relative)) ago")
+                            } else {
+                                Text("No reading yet")
+                            }
+                        }
                             .font(.caption)
                             .foregroundStyle(Color("colorSecondary"))
                             .lineLimit(1)
