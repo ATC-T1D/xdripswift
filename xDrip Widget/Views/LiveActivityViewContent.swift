@@ -190,7 +190,11 @@ struct LiveActivityViewContentState: View {
                         // System-managed relative text keeps aging even without a new reading.
                         Group {
                             if let readingDate = state.bgReadingDate {
-                                Text("Updated \(Text(readingDate, style: .relative)) ago")
+                                HStack(spacing: 3) {
+                                    Text("Updated")
+                                    Text(readingDate, style: .relative)
+                                    Text("ago")
+                                }
                             } else {
                                 Text("No reading yet")
                             }

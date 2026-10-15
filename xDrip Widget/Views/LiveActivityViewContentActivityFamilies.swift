@@ -86,7 +86,10 @@ struct LiveActivityViewContentActivityFamiliesState: View {
                             // Keep the compact reading age live without waiting for app updates.
                             Group {
                                 if let readingDate = state.bgReadingDate {
-                                    Text("\(Text(readingDate, style: .relative)) ago")
+                                    HStack(spacing: 3) {
+                                        Text(readingDate, style: .relative)
+                                        Text("ago")
+                                    }
                                 } else {
                                     Text("No reading")
                                 }
