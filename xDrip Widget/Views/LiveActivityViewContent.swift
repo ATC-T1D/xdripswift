@@ -221,7 +221,6 @@ struct LiveActivityViewContentState: View {
                 HStack(spacing: 3) {
                     Text("Updated")
                     Text(readingDate, style: .relative)
-                    Text("ago")
                 }
             } else {
                 Text("No reading yet")
