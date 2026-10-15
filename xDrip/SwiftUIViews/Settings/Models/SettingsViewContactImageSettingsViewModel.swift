@@ -311,7 +311,8 @@ private struct ContactImageSettingsPreview: View {
                     bgRangeDescription: .inRange,
                     valueIsUpToDate: true,
                     useHighContrastContactImage: useHighContrast,
-                    disableContactImage: false
+                    disableContactImage: false,
+                    readingTimestamp: Date()
                 )
                 .clipShape(Circle())
                 .scaleEffect(previewSize / 256)

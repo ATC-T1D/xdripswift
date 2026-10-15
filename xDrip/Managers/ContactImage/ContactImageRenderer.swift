@@ -21,6 +21,13 @@ struct ContactImageRenderer: View {
     var valueIsUpToDate: Bool
     var useHighContrastContactImage: Bool
     var disableContactImage: Bool
+    var readingTimestamp: Date?
+
+    private var timestampText: String? {
+        guard !disableContactImage, bgValue > 0, let readingTimestamp else { return nil }
+        // Use the reading time, not the render time: stale data must not look fresh.
+        return readingTimestamp.formatted(date: .omitted, time: .shortened)
+    }
 
     private var bgColor: Color {
         if disableContactImage {
@@ -93,6 +100,7 @@ struct ContactImageRenderer: View {
 
     var body: some View {
         let content = content
+        let timestampText = timestampText
 
         Canvas { context, size in
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(.black))
@@ -101,7 +109,7 @@ struct ContactImageRenderer: View {
 
             let value = context.resolve(
                 Text(content.value)
-                    .font(.system(size: bgValueFontSize, weight: .bold))
+                    .font(.system(size: timestampText == nil ? bgValueFontSize : min(bgValueFontSize, content.showsSlopeArrow ? 86 : 110), weight: .bold))
                     .foregroundColor(bgColor)
                     .tracking(-0.025)
             )
@@ -110,14 +118,14 @@ struct ContactImageRenderer: View {
 
             context.draw(
                 value,
-                at: CGPoint(x: size.width / 2, y: valueOriginY + valueSize.height / 2),
+                at: CGPoint(x: size.width / 2, y: timestampText == nil ? valueOriginY + valueSize.height / 2 : (content.showsSlopeArrow ? 80 : 110)),
                 anchor: .center
             )
 
             if content.showsSlopeArrow {
                 let arrow = context.resolve(
                     Text(slopeArrow)
-                        .font(.system(size: 80, weight: .bold))
+                        .font(.system(size: timestampText == nil ? 80 : 54, weight: .bold))
                         .foregroundColor(bgColor)
                 )
                 let arrowSize = arrow.measure(in: size)
@@ -125,9 +133,25 @@ struct ContactImageRenderer: View {
 
                 context.draw(
                     arrow,
-                    at: CGPoint(x: size.width / 2, y: arrowOriginY + arrowSize.height / 2),
+                    at: CGPoint(x: size.width / 2, y: timestampText == nil ? arrowOriginY + arrowSize.height / 2 : 164),
                     anchor: .center
                 )
+            }
+
+            if let timestampText {
+                // Keep the label within the circular crop, including 12-hour locales.
+                let timestamp = context.resolve(
+                    Text(timestampText)
+                        .font(.system(size: 26, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundColor(bgColor)
+                )
+                let timestampSize = timestamp.measure(in: CGSize(width: 1024, height: 64))
+                let scale = min(1, 176 / max(timestampSize.width, 1))
+                var timestampContext = context
+                timestampContext.translateBy(x: size.width / 2, y: 210)
+                timestampContext.scaleBy(x: scale, y: scale)
+                timestampContext.draw(timestamp, at: .zero, anchor: .center)
             }
         }
         .frame(width: 256, height: 256)
