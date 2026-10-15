@@ -133,23 +133,23 @@ struct ContactImageRenderer: View {
 
                 context.draw(
                     arrow,
-                    at: CGPoint(x: size.width / 2, y: timestampText == nil ? arrowOriginY + arrowSize.height / 2 : 164),
+                    at: CGPoint(x: size.width / 2, y: timestampText == nil ? arrowOriginY + arrowSize.height / 2 : 150),
                     anchor: .center
                 )
             }
 
             if let timestampText {
-                // Keep the label within the circular crop, including 12-hour locales.
+                // Enlarge the reading time; keep long 12-hour labels inside the circular crop.
                 let timestamp = context.resolve(
                     Text(timestampText)
-                        .font(.system(size: 26, weight: .semibold))
+                        .font(.system(size: 34, weight: .semibold))
                         .monospacedDigit()
                         .foregroundColor(bgColor)
                 )
                 let timestampSize = timestamp.measure(in: CGSize(width: 1024, height: 64))
-                let scale = min(1, 176 / max(timestampSize.width, 1))
+                let scale = min(1, 160 / max(timestampSize.width, 1))
                 var timestampContext = context
-                timestampContext.translateBy(x: size.width / 2, y: 210)
+                timestampContext.translateBy(x: size.width / 2, y: 204)
                 timestampContext.scaleBy(x: scale, y: scale)
                 timestampContext.draw(timestamp, at: .zero, anchor: .center)
             }
